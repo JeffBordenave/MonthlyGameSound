@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public enum Note
 {
@@ -22,6 +23,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] private AudioClip Mi = default;
     [SerializeField] private AudioClip Fa = default;
 
+    [SerializeField] private Text uiText = default;
+    [SerializeField] private Image redScreen = default;
+
     public bool playerPlayed = false;
     public Note playerPlayedNote = Note.Do;
 
@@ -31,13 +35,23 @@ public class GameManager : MonoBehaviour
 
     private float timeUntilNextNote = 3f;
     private float availableTime = 2.5f;
-
     private float counterNextNote = 0f;
     private float counterAvTime = 0f;
+    private float currentScore = 0f;
+
+    private float redColorA = 0f;
+    private float redBlinkSpeed = 1.3f;
+    private bool playAnim = false;
 
     void Update()
     {
         RoundPlayer();
+        if (playAnim) AnimRedScreen();
+
+        if (player.life == 0 && !playAnim)
+        {
+            SceneManager.LoadScene(0);
+        }
     }
 
     private void RoundPlayer()
@@ -50,27 +64,17 @@ public class GameManager : MonoBehaviour
             {
                 PlaySound(PickARandomNote());
                 noteBeenPlayed = true;
-
             }
             
             counterAvTime += Time.deltaTime;
 
             if (playerPlayed)
             {
-                if (playerPlayedNote == playedNote)
-                {
-                    PlayerWins();
-                }
-                else
-                {
-                    PlayerLoses();
-                }
+                if (playerPlayedNote == playedNote) PlayerWins();
+                else PlayerLoses();
             }
 
-            if (counterAvTime >= availableTime)
-            {
-                PlayerLoses();
-            }
+            if (counterAvTime >= availableTime) PlayerLoses();
         }
     }
 
@@ -104,19 +108,17 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("Player wins");
 
+        currentScore++;
+        uiText.text = currentScore.ToString();
+
         ResetParameters();
     }
 
     private void PlayerLoses()
     {
-        Debug.Log("Player loses");
+        playAnim = true;
 
         player.life -= 1;
-
-        if (player.life == 0)
-        {
-            SceneManager.LoadScene(0);
-        }
 
         ResetParameters();
     }
@@ -129,5 +131,21 @@ public class GameManager : MonoBehaviour
         playerPlayed = false;
         noteBeenPlayed = false;
         playerPlayedNote = Note.None;
+    }
+
+    private void AnimRedScreen()
+    {
+        redColorA += redBlinkSpeed * Time.deltaTime;
+
+        if (redColorA > 0.6) redBlinkSpeed *= -1;
+        else if(redColorA < 0)
+        {
+            playAnim = false;
+            redColorA = 0;
+            redBlinkSpeed = 1.3f;
+            redScreen.color = Color.clear;
+        }
+
+        redScreen.color = new Color(1, 1, 1, redColorA);
     }
 }
