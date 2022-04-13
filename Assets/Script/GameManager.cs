@@ -33,8 +33,8 @@ public class GameManager : MonoBehaviour
 
     private Note playedNote = Note.Do;
 
-    private float timeUntilNextNote = 3f;
-    private float availableTime = 2.5f;
+    private float timeUntilNextNote = 3.5f;
+    private float availableTime = 4f;
     private float counterNextNote = 0f;
     private float counterAvTime = 0f;
     private float currentScore = 0f;
@@ -65,7 +65,7 @@ public class GameManager : MonoBehaviour
                 PlaySound(PickARandomNote());
                 noteBeenPlayed = true;
             }
-            
+
             counterAvTime += Time.deltaTime;
 
             if (playerPlayed)
@@ -76,6 +76,7 @@ public class GameManager : MonoBehaviour
 
             if (counterAvTime >= availableTime) PlayerLoses();
         }
+        else playerPlayedNote = Note.None;
     }
 
     private void PlaySound(Note note)
